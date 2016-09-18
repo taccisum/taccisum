@@ -1,0 +1,33 @@
+﻿
+@{
+    ViewBag.Title = "tac - 首页";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section head{
+    <script>
+
+        $(function() {
+            $("#btn-add_btn").on("click", function() {
+                $("#div1").append($("<button class='btn btn-success btn-sm btn-test' style='margin-left: 5px; margin-right: 5px;'><i class='icon-apple'></i>alert</button>"));
+            });
+
+            $("#div1").on("click", ".btn-test", function() {
+                alert("aasd");
+            });
+
+        });
+
+
+    </script>
+}
+
+@section tips{
+    <span class="bold">公共测试页面</span>
+    <button type="button" class="close" data-dismiss="alert"><i class="icon-remove"></i></button>
+}
+
+<div id="div1"><button class="btn btn-success btn-sm btn-test" style="margin-right: 5px;"><i class="icon-apple"></i>alert</button></div>
+
+<br/><br/>
+<button id="btn-add_btn" class="btn btn-success btn-sm"><i class="icon-plus"></i>新增</button>

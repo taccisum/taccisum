@@ -1,0 +1,786 @@
+﻿@{
+    ViewBag.Title = "Beacher-商品管理";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+}
+@section head{
+    <script type="text/javascript" src="~/Scripts/fileupload/jquery.uploadify.js"></script>
+    <link href="~/Scripts/fileupload/uploadify.css" rel="stylesheet" type="text/css" />
+
+    <script>
+    var saleProduct;
+
+    require(["systools"], function (tool) {
+        saleProduct = function(id, isSaled, type) {
+            if (isSaled == "true" && type == "upSaledProduct") {
+                tool.msgbox("商品已经上架", "i");
+                return;
+            }
+
+            if (isSaled == "false" && type == "downSaledProduct") {
+                tool.msgbox("商品已经下架", "i");
+                return;
+            }
+            $.ajax({
+                url: "/Product/OnSaledProduct",
+                data: {
+                    id: id,
+                    type: type
+
+                },
+                type: 'post',
+                dataType: 'json',
+                success: function(data) {
+                    if (data.Success) {
+                        if (data.Data == "downSaledProduct") {
+                            tool.msgbox("下架成功", "y");
+                        } else {
+                            tool.msgbox("上架成功", "y");
+                        }
+
+                        $("#table_id").DataTable().ajax.reload();
+                    } else {
+                        if (data.Data == "downSaledProduct") {
+                            tool.msgbox("下架失败", "n");
+                        } else {
+                            tool.msgbox("上架失败", "n");
+                        }
+                    }
+                }
+            });
+        };
+
+        var skuArray = new Array(); //声明数组,用来储存标题信息
+        function Sku(SkuName) {
+            this.SkuName = SkuName;
+        }
+
+        String.prototype.trim = function () { //去除空格
+            return this.replace(/(^\s*)|(\s*$)/g, '');
+        }
+
+        var initAddSku = function () {
+            //测试数据
+            var skutable = tool.table("#table_addSku", {
+                serverSide: false,
+                bLengthChange: false,
+                data: skuArray,
+                language: {
+                    zeroRecords: "<span class='bold' style='color: salmon;'>&nbsp;&nbsp;</span>"
+                },
+                columns: [
+                    { data: 'SkuName', title: 'SkuName' }
+                ]
+            });
+
+            var $d_add_sku = $("#dialog-add_sku");
+            var dialogr_add_sku_html = $d_add_sku.html(); //添加商品对话框网页
+            $d_add_sku.remove();
+            $("#btn_addSku")
+                .bind("click",
+                    function () {
+                        var dialogindex = 1;
+                        tool.dialog({
+                            id: "dialog-chat" + dialogindex,
+                            title: "新增规格",
+                            content: dialogr_add_sku_html,
+                            width: "500px",
+                            button: [
+                                {
+                                    id: "cancel",
+                                    value: "<i class='icon-remove'></i>取消",
+                                    callback: function () {
+                                        return true;
+                                    },
+                                    cls: "btn btn-default btn-sm"
+                                },
+                                {
+                                    id: "ok",
+                                    value: "<i class='icon-ok'></i>确定",
+                                    callback: function () {
+                                        var self = this;
+                                        self.title("提交中…");
+                                        //参数校验
+                                        var skuName = $("input[name='SkuName']").val();
+
+                                        if (skuName == "") {
+                                            tool.msgbox("规格名不能为空", "w");
+                                            return false;
+                                        }
+
+                                        if (skuArray.length > 0) {
+                                            //检验规格名是否重复
+                                            for (var i = 0; i < skuArray.length; i++) {
+                                                if (skuName == (skuArray[i].SkuName)) {
+                                                    console.log("我是重复的兄弟" + skuArray[i].SkuName);
+                                                    tool.msgbox("规格名不能重复", "w");
+                                                    self.remove();
+                                                    return false;
+                                                }
+
+                                            }
+                                        }
+
+                                        skuArray.push(new Sku(skuName.trim()));
+                                        skutable.row.add(new Sku(skuName.trim())).draw(true);
+                                        self.remove();
+                                        dialogindex++;
+                                        return false;
+                                    },
+                                    cls: "btn btn-success btn-sm"
+                                }
+                            ],
+                            onshow: function () {
+
+                            }
+                        })
+                            .showModal();
+
+                    });
+            $("#btn_delSku")
+                .bind("click",
+                    function () {
+                        if (confirm("确认删除？")) {
+                            var allTrs = $('#table_addSku tbody tr');
+                            $.each(allTrs,
+                                function (index, row) {
+                                    //遍历表格所有表单项寻找当前被点击条项
+                                    if ($(this).attr("class").indexOf("selected") > 0) {
+                                        skuArray.splice(index, 1);
+                                        skutable.row($(this)).remove().draw(true);
+                                    }
+                                });
+                        }
+                    });
+        };
+
+
+
+        var $d_add_product = $("#dialog-add_product");
+        var $d_edit_product = $("#dialog-edit_produtct");
+        var $d_watch_product = $("#dialog-watch_product");
+
+        var dialogr_edit_product_html = $d_edit_product.html(); //编辑商品对话框网页
+        var dialogr_add_use_html = $d_add_product.html(); //添加商品对话框网页
+        var dialogr_watch_product_html = $d_watch_product.html(); //查看商品对话框网页
+
+        $d_add_product.remove(); //将网页代码移除
+        $d_edit_product.remove();
+        $d_watch_product.remove();
+
+
+        var table = tool.table("#table_id", {
+            serverSide: true,
+            iDisplayLength: 10,
+            ajax: {
+                url: "/Product/GetProductList",
+                type: "post",
+                data: function (data) {
+                    //添加额外的参数传给服务器
+                    data.ProductName = $("#s-productName").val();
+                    data.BandName = $("#s-Bandname").val();
+                }
+            },
+            columns: [
+                { data: 'ID', title: '商品ID', "visible": false },
+                { data: 'ProductName', title: '商品名', sortable: true },
+                { data: 'Description', title: '商品描述', bSortable: true },
+                { data: 'BandName', title: '品牌名' },
+                {
+                    data: 'PictureUrl',
+                    title: '商品图片',
+                    render: function (data, type, row, meta) {
+                        //这里是主题  把url变成超链接、把图片路径显示为图片
+                        //return "<a href='" + data + "'>" + data + "</a>";
+                        return "<img src='" + data + "'  width='40px' height='40px' />";
+                    }
+                },
+                { data: 'Price', title: '商品价格' },
+                { data: 'IsSaled', title: '是否上架' },
+                { data: null, title: '上架操作' }
+            ],
+            columnDefs: [
+                {
+                    //   指定第最后一列
+                    targets: 7,
+                    render: function (data, type, row, meta) {
+                        return '<a type="button"  href="#" onclick="javascript:saleProduct(\'' +
+                            row.ID +
+                            '\',\'' +
+                            row.IsSaled +
+                            '\',\'upSaledProduct\')" >上架&nbsp</a>' +
+                            '<a type="button"  href="#" onclick="javascript:saleProduct(\'' +
+                            row.ID +
+                            '\',\'' +
+                            row.IsSaled +
+                            '\',\'downSaledProduct\')" >下架&nbsp</a>';
+                    }
+                }
+            ],
+            rowDbClick: function (api, row) {
+                var vm;
+
+                tool.dialog({
+                    id: "dialog-chat",
+                    title: "查看商品详情",
+                    content: dialogr_watch_product_html,
+                    width: "500px",
+                    onshow: function () {
+                        vm = {
+                            ID: ko.observable(""),
+                            ProductName: ko.observable(""),
+                            Description: ko.observable(""),
+                            BandName: ko.observable(""),
+                            Price: ko.observable(""),
+                            PictureUrl: ko.observable("")
+                        }
+                        ko.applyBindings(vm, document.getElementById("content-watch_product"));
+
+                        var id = row.ID;
+                        var productName = row.ProductName;
+                        var description = row.Description;
+                        var bandName = row.BandName;
+                        var pictureUrl = row.PictureUrl;
+                        var price = row.Price;
+
+                        vm.ID(id);
+                        vm.ProductName(productName);
+                        vm.Description(description);
+                        vm.BandName(bandName);
+                        vm.Price(price);
+                        vm.PictureUrl(pictureUrl);
+                    }
+                })
+                    .showModal();
+                return;
+            }
+        });
+
+
+        $("#btn-add")
+            .bind("click",
+                function () {
+                    var vm;
+                    tool.dialog({
+                        id: "dialog-chat",
+                        title: "新增商品",
+                        content: dialogr_add_use_html,
+                        width: "500px",
+                        button: [
+                            {
+                                id: "cancel",
+                                value: "<i class='icon-remove'></i>取消",
+                                callback: function () {
+                                    return true;
+                                },
+                                cls: "btn btn-default btn-sm"
+                            },
+                            {
+                                id: "ok",
+                                value: "<i class='icon-ok'></i>确定",
+                                callback: function () {
+
+
+                                    //参数校验
+                                    var price = $("input[name='Price']").val();
+                                    var productName = $("input[name='ProductName']").val();
+                                    var bandName = $("input[name='BandName']").val();
+
+
+                                    if (price == "" || parseFloat(price).toFixed(2) <= 0) {
+                                        tool.msgbox("商品价格只保留小数点，<br/>后两位应该大于零或不能为空", "w");
+                                        return false;
+                                    }
+
+                                    if (productName == "") {
+                                        tool.msgbox("商品名不能为空", "w");
+                                        return false;
+                                    }
+
+                                    if (bandName == "") {
+                                        tool.msgbox("品牌名不能为空", "w");
+                                        return false;
+                                    }
+
+                                    if (!skuArray.length > 0) {
+                                        tool.msgbox("规格不能为空", "w");
+                                        return false;
+                                    }
+
+                                    var self = this;
+                                    self.title("提交中…");
+
+                                    var params = ko.mapping.toJS(vm);
+                                    var json = {};
+                                    json.product = params;
+                                    json.skus = skuArray;
+                                    json.product.Bands = undefined;
+
+                                    var jsonStr = JSON.stringify(json);
+
+                                    console.log(json);
+                                    $.post("/Product/InsertProduct?jsonStr=" + jsonStr,
+                                        function (result) {
+                                            if (result.Success) {
+                                                tool.msgbox("添加成功", "y");
+                                                self.remove();
+                                                table.ajax.reload();
+                                            } else {
+                                                tool.msgbox("添加失败", "n");
+                                            }
+
+                                        });
+
+                                    return false;
+                                },
+                                cls: "btn btn-success btn-sm"
+                            }
+                        ],
+                        onshow: function () {
+                            var bandData;
+                            //初始化品牌下拉框数据
+                            $.get("/Band/GetForProductBandList",
+                                function (data, status) {
+                                    if (status == "success") {
+                                        bandData = data;
+                                        vm = {
+                                            Bands: ko.observableArray(bandData),
+                                            ProductName: ko.observable(""),
+                                            Description: ko.observable(""),
+                                            BandName: ko.observable(""),
+                                            Price: ko.observable(""),
+                                            PictureUrl: ko.observable(""),
+                                            ProductNum: ko.observable("")
+                                        }
+                                        ko
+                                            .applyBindings(vm, document.getElementById("content-add_product"));
+                                        //绑定数据
+
+                                    } else {
+                                        alert("品牌数据加载失败！");
+                                    }
+                                });
+                            initAddSku();
+                        }
+                    })
+                        .showModal();
+                });
+
+        $("#btn-query")
+            .bind("click",
+                function () {
+                    table.ajax.reload();
+                });
+        $("#btn-delete")
+            .bind("click",
+                function () {
+                    if (confirm("确认删除？")) {
+                        var rows = table.rows('.selected').data();
+                        var idList = "";
+
+                        $.each(rows,
+                            function (index, row) {
+                                idList += row.ID + ",";
+                            });
+
+                        idList = idList.substr(0, idList.length - 1);
+                        $.get("/Product/Remove?idList=" + idList,
+                            function (result) {
+                                var icon = "n";
+                                if (result.Success) {
+                                    icon = "y";
+                                    table.ajax.reload();
+                                }
+                                tool.msgbox(result.Message, icon);
+                            });
+                    }
+
+                });
+
+        $(".query-input")
+            .each(function () {
+                $(this)
+                    .keyup(function (event) {
+                        var e = event || window.event;
+                        if (e.keyCode == "13") {
+                            $("#btn-query").click();
+                        }
+                    });
+            });
+
+        $("#btn-update")
+            .bind("click",
+                function () {
+                    var rows = table.rows('.selected').data();
+                    var editNum = rows.length;
+                    var vm;
+                    if (editNum == 0) {
+                        alert("需要要选择一条数据");
+                    }
+                    if (editNum == 1) {
+
+                        tool.dialog({
+                            id: "dialog-chat",
+                            title: "编辑商品",
+                            content: dialogr_edit_product_html,
+                            width: "500px",
+                            button: [
+                                {
+                                    id: "cancel",
+                                    value: "<i class='icon-remove'></i>取消",
+                                    callback: function () {
+                                        return true;
+                                    },
+                                    cls: "btn btn-default btn-sm"
+                                },
+                                {
+                                    id: "ok",
+                                    value: "<i class='icon-ok'></i>确定",
+                                    callback: function () {
+                                        var self = this;
+                                        self.title("提交中…");
+
+                                        var params = ko.mapping.toJS(vm);
+                                        $.post("/Product/Edit",
+                                            params,
+                                            function (result) {
+                                                if (result.Success) {
+                                                    tool.msgbox("修改成功", "y");
+                                                    self.remove();
+                                                    table.ajax.reload();
+                                                } else {
+                                                    tool.msgbox("添加失败", "n");
+                                                }
+                                            });
+
+                                        return false;
+                                    },
+                                    cls: "btn btn-success btn-sm"
+                                }
+                            ],
+                            onshow: function () {
+                                vm = {
+                                    ID: ko.observable(""),
+                                    ProductName: ko.observable(""),
+                                    Description: ko.observable(""),
+                                    BandName: ko.observable(""),
+                                    Price: ko.observable(""),
+                                    PictureUrl: ko.observable("")
+                                }
+                                ko.applyBindings(vm, document.getElementById("content-edit_product"));
+
+                                var id = rows[0].ID;
+                                var productName = rows[0].ProductName;
+                                var description = rows[0].Description;
+                                var bandName = rows[0].BandName;
+                                var pictureUrl = rows[0].PictureUrl;
+                                var price = rows[0].Price;
+
+                                vm.ID(id);
+                                vm.ProductName(productName);
+                                vm.Description(description);
+                                vm.BandName(bandName);
+                                vm.Price(price);
+                                vm.PictureUrl(pictureUrl);
+
+                                //添加界面的附件管理
+                                $('#file_upload')
+                                    .uploadify({
+                                        'swf': '../Scripts/fileupload/uploadify.swf', //FLash文件路径
+                                        'buttonText': '浏  览', //按钮文本
+                                        'uploader': '../Product/Upload', //处理文件上传Action
+                                        'queueID': 'fileQueue', //队列的ID
+                                        'queueSizeLimit': 10, //队列最多可上传文件数量，默认为999
+                                        'auto': false, //选择文件后是否自动上传，默认为true
+                                        'multi': true, //是否为多选，默认为true
+                                        'removeCompleted': true, //是否完成后移除序列，默认为true
+                                        'fileSizeLimit': '10MB', //单个文件大小，0为无限制，可接受KB,MB,GB等单位的字符串值
+                                        'fileTypeDesc': 'Image Files', //文件描述
+                                        'fileTypeExts': '*.gif; *.jpg; *.png; *.bmp;*.tif;*.doc;*.xls;*.zip',
+                                        //上传的文件后缀过滤器
+                                        fileObjectName: 'FileData', //上传文件参数
+                                        'onUploadSuccess': function (file, data, response) { //上传成功
+                                            var dataObj = eval("(" + data + ")");
+                                            if (dataObj.Success) {
+                                                alert("文件上传成功");
+                                                vm.PictureUrl(dataObj.Data);
+                                                //$("#edit_PictureUrl").val(dataObj.Data);
+                                            } else {
+
+                                            }
+
+                                        },
+                                        'onUploadStart': function (file) {
+                                            $("#file_upload")
+                                                .uploadify("settings",
+                                                    'formData',
+                                                    { 'folder': '政策法规', 'guid': $("#Attachment_GUID").val() });
+                                            //动态传参数
+                                        },
+                                        'onUploadError': function (event, queueId, fileObj, errorObj) {
+                                            //alert(errorObj.type + "：" + errorObj.info);
+                                        }
+                                    });
+
+                            }
+                        })
+                            .showModal();
+
+                    }
+
+
+                    if (editNum > 1) {
+                        alert("只能选择一条数据");
+                    }
+
+                }
+            );
+
+    });
+
+
+    </script>
+}
+
+@section tips{
+    <span class="bold">aaaasd</span>
+    <button type="button" class="close" data-dismiss="alert"><i class="icon-remove"></i></button>
+}
+
+@section parameters{
+    <div class="container" style="width: 100%;">
+        <div class="row">
+            <div class="col-xs-6 col-md-6">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-addon bold">商品名</span>
+                    <input id="s-productName" class="form-control query-input" type="text" />
+                </div>
+            </div>
+            <div class="col-xs-6 col-md-6">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-addon bold">品牌名</span>
+                    <input id="s-Bandname" class="form-control query-input" type="text" />
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@section buttons{
+    <button id="btn-query" class="btn btn-info btn-sm"><i class="icon-refresh"></i> 查询 </button>
+    <button id="btn-add" class="btn btn-success btn-sm"><i class="icon-plus"></i> 新增 </button>
+    <button id="btn-delete" class="btn btn-danger btn-sm"><i class="icon-remove"></i> 删除 </button>
+    <button id="btn-update" class="btn btn-info btn-sm"><i class="icon-pencil"></i> 修改 </button>
+}
+
+
+<table id="table_id"></table>
+
+
+<div id="dialog-add_product" class="hidden">
+    <div id="content-add_product" class="container" style="width: 100%">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-addon bold">商品名</span>
+                    <input class="form-control" name="ProductName" data-bind="value: ProductName"/>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-addon bold">商品描述</span>
+                    <input class="form-control" name="Description" data-bind="value: Description"/>
+                </div>
+            </div>
+        </div>
+        <div class="emptyRow"></div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-addon bold">品牌名</span>
+                    <div class="controls">
+                        <select id="bandNumSelect" data-bind="options: Bands,
+　　　　　　　　　　　　　　optionsText: 'BandName', optionsValue:'BandName',value: BandName, optionsCaption: '选择BandName...'"></select>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-addon bold">商品价格</span>
+                    <input class="form-control" name="Price" data-bind="value: Price"/>
+                </div>
+            </div>
+        </div>
+
+        <div class="emptyRow"></div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-addon bold">商品数量</span>
+                    <input class="form-control" name="ProductNum" data-bind="value: ProductNum"/>
+                </div>
+            </div>
+        </div>
+
+        <div class="emptyRow"></div>
+    </div>
+    <br/>
+    <h5>添加商品规格</h5>
+    <button id="btn_addSku" class="btn btn-success btn-sm"><i class="icon-plus"></i> 新增 </button>
+    <button id="btn_delSku" class="btn btn-danger btn-sm"><i class="icon-remove"></i> 删除 </button>
+    <table id="table_addSku">
+    </table>
+</div>
+
+
+<div id="dialog-edit_produtct" class="hidden">
+    <div id="content-edit_product" class="container" style="width: 100%">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="input-group input-group-sm">
+                    <input id="edit_ID" class="form-control" type="hidden" data-bind="value: ID" />
+                    <span class="input-group-addon bold">商品名</span>
+                    <input class="form-control" id="edit_ProductName" data-bind="value: ProductName" />
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-addon bold">商品描述</span>
+                    <input class="form-control" id="edit_Description" data-bind="value: Description" />
+                </div>
+            </div>
+        </div>
+        <div class="emptyRow"></div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-addon bold">品牌名</span>
+                    <input class="form-control" id="edit_BandName" data-bind="value: BandName" />
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-addon bold">商品价格</span>
+                    <input class="form-control" id="edit_Price" data-bind="value: Price" />
+                </div>
+            </div>
+        </div>
+
+        <div class="emptyRow"></div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <label for="exampleInputFile">上传商品图片</label>
+                <input class="form-control" id="edit_PictureUrl" data-bind="value: PictureUrl" />
+                <input id="file_upload" name="file_upload" multiple type="file">
+                <a href="javascript:void(0)" id="btnUpload"
+                   onclick="javascript: $('#file_upload').uploadify('upload', '*')">上传</a>
+                <a href="javascript:void(0)" id="btnCancelUpload"
+                   onclick="javascript: $('#file_upload').uploadify('cancel', '*')">取消</a>
+                <div id="fileQueue"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="dialog-watch_product" class="hidden">
+    <div id="content-watch_product" class="container" style="width: 100%">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-addon bold">商品名</span>
+                    <input class="form-control" readonly="readonly" name="ProductName" data-bind="value: ProductName" />
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-addon bold">商品描述</span>
+                    <input class="form-control" readonly="readonly" name="Description" data-bind="value: Description" />
+                </div>
+            </div>
+        </div>
+        <div class="emptyRow"></div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-addon bold">品牌名</span>
+                    <input class="form-control" name="BandName" readonly="readonly" data-bind="value: BandName" />
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-addon bold">商品价格</span>
+                    <input class="form-control" name="Price" readonly="readonly" data-bind="value: Price" />
+                </div>
+            </div>
+        </div>
+
+        <div class="emptyRow"></div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <label for="exampleInputFile">上传商品图片</label>
+                <input id="add_Picturl" class="form-control" readonly="readonly"  data-bind="value: PictureUrl" />                
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div id="dialog-add_sku" class="hidden">
+    <div id="content-add_sku" class="container" style="width: 100%">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-addon bold">商品规格</span>
+                    <input class="form-control" name="SkuName"/>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+</div>
+
+@*//添加界面的附件管理
+                                    $('#file_upload')
+                                        .uploadify({
+                                            'swf': '../Scripts/fileupload/uploadify.swf', //FLash文件路径
+                                            'buttonText': '浏  览', //按钮文本
+                                            'uploader': '../Product/Upload', //处理文件上传Action
+                                            'queueID': 'fileQueue', //队列的ID
+                                            'queueSizeLimit': 10, //队列最多可上传文件数量，默认为999
+                                            'auto': false, //选择文件后是否自动上传，默认为true
+                                            'multi': true, //是否为多选，默认为true
+                                            'removeCompleted': true, //是否完成后移除序列，默认为true
+                                            'fileSizeLimit': '10MB', //单个文件大小，0为无限制，可接受KB,MB,GB等单位的字符串值
+                                            'fileTypeDesc': 'Image Files', //文件描述
+                                            'fileTypeExts': '*.gif; *.jpg; *.png; *.bmp;*.tif;*.doc;*.xls;*.zip',
+                                            //上传的文件后缀过滤器
+                                            fileObjectName: 'FileData', //上传文件参数
+                                            'onUploadSuccess': function(file, data, response) { //上传成功
+                                                var dataObj = eval("(" + data + ")");
+                                                if (dataObj.Success) {
+                                                    alert("文件上传成功");
+                                                    vm.PictureUrl(dataObj.Data);
+
+
+                                                } else {
+
+                                                }
+
+                                            },
+                                            'onUploadStart': function(file) {
+                                                $("#file_upload")
+                                                    .uploadify("settings",
+                                                        'formData',
+                                                        { 'folder': '政策法规', 'guid': $("#Attachment_GUID").val() });
+                                                //动态传参数
+                                            },
+                                            'onUploadError': function(event, queueId, fileObj, errorObj) {
+                                                //alert(errorObj.type + "：" + errorObj.info);
+                                            }
+                                        });*@

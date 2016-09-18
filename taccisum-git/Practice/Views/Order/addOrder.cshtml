@@ -1,0 +1,179 @@
+﻿@{
+    ViewBag.Title = "商品主页";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@section head
+{
+    <script>
+        function Product(pId, pNum) {
+            this.pId = pId;
+            this.pNum = pNum;
+        }
+        function AddProduct(pid) {
+            if (CarInfo.length > 0) {
+                var temp = 0;
+                //判断商品数据是否存在购物车内，若存在则数量加1，不存在则创建该商品对象 
+                for (var i = 0; i < CarInfo.length; i++) {
+                    if (CarInfo[i].pId === pid) {
+                        CarInfo[i].pNum = CarInfo[i].pNum + 1;
+                        alert(CarInfo[i].pId + ":" + CarInfo[i].pNum);
+                        break;
+                    } else {
+                        temp++;
+                    }
+                }
+                //遍历完成，若temp === CarInfo.length 说明购物车无此商品
+                if (temp === CarInfo.length) {
+                    CarInfo.push(new Product(pid, 1));
+                    alert("添加了新商品:" + pid);
+                }
+            } else {
+                //第一次添加商品到购物车
+                CarInfo.push(new Product(pid, 1));
+                alert("添加了新商品:" + pid);
+            }
+        }
+
+        require(["systools"], function (tool) {
+            //存放购物车商品信息
+            var CarInfo = new Array();
+            //商品对象 商品编号和数量
+
+
+            var vm; //模型
+            var table = tool.table("#table_id", {
+                serverSide: true,
+                ajax: {
+                    url: "/Product/GetProductList",
+                    type: "post",
+                    data: function(data) {
+                        //添加额外的参数传给服务器
+                        data.ProductName = $("#s-productName").val();
+                        data.BandName = $("#s-Bandname").val();
+                    }
+                },
+                columns: [
+                    { data: 'ID', title: '商品ID', "visible": false },
+                    { data: 'ProductName', title: '商品名称', sortable: true },
+                    { data: 'Description', title: '描述' },
+                    { data: 'BandName', title: '品牌名称' },
+                    {
+                        data: 'PictureUrl',
+                        title: '商品图片',
+
+                        render: function(data, type, row, meta) {
+                            //这里是主题  把url变成超链接、把图片路径显示为图片
+                            //return "<a href='" + data + "'>" + data + "</a>";
+                            return "<img src='" + data + "'class='img-rounded' width='50px'/>";
+                        }
+                    },
+                    { data: 'Price', title: '价格' }
+                ],
+                columnDefs: [
+                    {
+                        //操作对应列
+                        targets: 6,
+                        title: '操作',
+                        render: function(data, type, row) {
+                            var pId = row.ID;
+                            var html = "<a href='javascript:void(0);'class='#' onclick='AddProduct(\"" + pId + "\")'><i class='icon-shopping-cart'></i> 加入购物车</a>";
+                            return html;
+                        }
+                    }
+                ]
+            });
+
+            var $shopCar = $("#dialog-shop_car");
+            var shopCarHtml = $shopCar.html();
+            $shopCar.remove(); //移除HTML代码，重新加载
+            $("#btn-shopCar").bind("click", function () {
+                var _width = document.body.scrollWidth / 2;
+                tool.dialog({
+                    id: "dialog-chat",
+                    title: "购物车",
+                    content: shopCarHtml,
+                    width: _width,
+                    button: [
+                        {
+                            id: "cancel",
+                            value: "<i class='icon-home'></i>返回前页",
+                            callback: function () {
+                                return true;
+                            },
+                            cls: "btn btn-default btn-sm"
+                        },
+                        {
+                            id: "ok",
+                            value: "<i class='icon-ok'></i>立即购买",
+                            callback: function () {
+
+                                var self = this;
+                                self.title("下单中…");
+                                var params = ko.mapping.toJS(vm);
+                                $.post("#", params, function (result) {
+                                    if (result.Success) {
+                                        tool.msgbox("购买成功", "y");
+                                        self.remove();
+                                        table.ajax.reload();
+                                    } else {
+                                        tool.msgbox("购买失败！<br /><a class='click' style='font-size: 13px;' href=\"javascript:alert('这里显示异常信息')\">查看详细异常</a>", "n");
+                                    }
+                                });
+                                return false;
+
+                            },
+                            cls: "btn btn-success btn-sm"
+                        }
+                    ],
+                    onshow: function () {
+                        vm = {
+
+                        };
+                        var elem = document.getElementById("content-shop_car");
+                        ko.cleanNode(elem);
+                        ko.applyBindings(vm, elem);
+                    }
+                }).showModal();
+
+            });
+
+            $("#btn-query").bind("click", function () {
+                table.ajax.reload();
+            });
+
+        });
+
+
+    </script>
+}
+@section parameters{
+    <div class="container" style="width: 100%;">
+        <div class="row">
+            <div class="col-xs-6 col-md-6">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-addon bold">商品名</span>
+                    <input id="s-productName" class="form-control query-input" type="text" />
+                </div>
+            </div>
+            <div class="col-xs-6 col-md-6">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-addon bold">品牌名</span>
+                    <input id="s-Bandname" class="form-control query-input" type="text" />
+                </div>
+            </div>
+        </div>
+    </div>
+}
+@section buttons{
+    <button class="btn btn-sm tooltip-info" id="btn-query"><i class="icon-search"></i> 查询商品 </button>
+    <!--======================================================================================================================-->
+    <button id="btn-shopCar" class="btn btn-success btn-sm"><i class="icon-eye-open"></i> 查看购物车 </button>
+}
+
+<div id="dialog-shop_car" class="hidden">
+    <div id="content-shop_car" class="container" style="width: 100%">
+
+    </div>
+</div>
+<!--======================================================================================================================-->
+<table id="table_id" class="display"></table>

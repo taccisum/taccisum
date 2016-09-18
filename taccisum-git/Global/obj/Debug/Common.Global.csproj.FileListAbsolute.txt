@@ -1,0 +1,5 @@
+E:\svn_download\mvc_project\backup\taccisum4.0-160908-green\Global\bin\Debug\Common.Global.dll
+E:\svn_download\mvc_project\backup\taccisum4.0-160908-green\Global\bin\Debug\Common.Global.pdb
+E:\svn_download\mvc_project\backup\taccisum4.0-160908-green\Global\obj\Debug\Common.Global.csprojResolveAssemblyReference.cache
+E:\svn_download\mvc_project\backup\taccisum4.0-160908-green\Global\obj\Debug\Common.Global.dll
+E:\svn_download\mvc_project\backup\taccisum4.0-160908-green\Global\obj\Debug\Common.Global.pdb

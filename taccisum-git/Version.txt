@@ -1,0 +1,43 @@
+当前版本: 4.0
+版本号以0.5或1递增，一些少量多次的调整不进行专门的记录
+
+1.0
+　　描述：搭建后台架构雏形。
+　　内容：
+　　主要框架：EF+MVC5+jQuery+Bootstrap+Knockout；
+　　系统架构：
+　　　　垂直方向：三层架构——DAL（即基于EF封装的Repository层）+BLL、IBLL、BLL.Proxy（业务逻辑层）+View（Website应用程序，与BLL层之间通过Controller层进行通信）
+　　　　水平方向：Model（映射EF的Entity及View层使用的ViewModel）+HelperUnit（扩展方法及可复用的工具类）+Factory（通用的工厂类）+
+Global（全局参数，如常量、枚举）+CustomerException（用户自定义异常）；
+
+2.0
+　　描述：优化系统架构。
+　　内容：
+　　添加一些常用的dll，诸如Newtonsoft.Json、Log4Net等；
+　　添加一些常用前端插件，如DataTables、ArtDialog、jQueryAutoComplete等，对其进行封装，方便扩展及使用；
+　　新增Controller及Bll层的单元测试项目；
+　　新增业务异常基类；
+　　完成系统模块：用户登陆、菜单管理等；
+
+2.5
+　　描述：微调后台架构
+　　新增基于Unity的IoC模块（以下简称Unity），将Controller与BLL完全解耦；
+
+3.0
+　　描述：大幅度调整后台架构。
+　　内容：
+　　系统架构：
+　　　　添加Dao、IDao层（基于Repository层，负责处理粒度更细、复用性更强的业务逻辑）；
+　　　　修改BLL相关层的命名为Service层（不直接与Repository层而是通过Dao层与其通信）；
+　　　　各层对应的接口不再放置于一个单独的工程，与实现类——路径为../Impl——统一放在同一个工程，路径为../Interf；
+　　　　封装各层的基类（BaseDao、BaseService、BaseController）供后续业务代码继承；
+　　其它：
+　　使用解决方案文件夹对各项目进行分类；
+　　使用Mef代替Unity实现IoC，保留Unity（用于特殊情况，如用于需要专门通过配置文件控制注入的类）；
+
+4.0
+　　大幅度调整前端架构。
+　　内容：
+　　引入requireJS，调整原先的js代码——分离html与javascript，通过requireJS控制js之间的依赖关系，除了少数核心js（如jquery、bootstrap）外全部通过请求的形式异步加载，实现模块化编程；
+　　引入mock.js，并封装为mockdata.js，用于生成常用的测试数据——如人名、手机号码等；
+　　引入systool，提供常用前端工具的统一调用入口。同时引入ToolDemoController，用于systool提供的工具使用演示；

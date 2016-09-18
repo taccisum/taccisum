@@ -1,0 +1,61 @@
+﻿@{
+    ViewBag.Title = "无访问权限";
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width"/>
+    <title>@ViewBag.Title</title>
+    @* jquery *@
+    <script src="/Scripts/jQuery/jquery-2.2.3.js"></script>
+
+    @*bootstrap*@
+    <link rel="stylesheet" href="/css/bootstrap-3.3.5-dist/css/bootstrap.css"/>
+    <script src="/css/bootstrap-3.3.5-dist/js/bootstrap.js"></script>
+
+    <link rel="stylesheet" href="/css/ace/css/font-awesome.min.css"/>
+
+    @* knockout *@
+    <script src="/Scripts/Knockout/knockout-3.4.0.debug.js"></script>
+    <script src="/Scripts/Knockout/plugin/knockout.mapping-latest.js"></script>
+
+    @* ace skins *@
+    <link rel="stylesheet" href="/css/ace/css/ace.min.css"/>
+
+    <style>
+        body {
+            font-family: 微软雅黑
+        }
+        .warning {
+            font-size: 20px;
+        }
+
+        .tips {
+            font-size: 20px;
+        }
+    </style>
+</head>
+
+
+
+<body>
+
+<div class="container">
+    <div style="margin-top: 300px; text-align: center;">
+        <div class="warning">
+            <div><i class=" icon-lock" style="font-size: 130px;"></i></div>
+            <div><span>非常抱歉，您没有访问权限……</span></div>
+        </div>
+        <br/><br/><br/>
+        <div class="tips">
+            <button class="btn btn-default btn-sm"><i class="icon-undo"></i> 返回上一页 </button>
+            &nbsp;&nbsp;&nbsp;
+            <button class="btn btn-default btn-sm"><i class="icon-home"></i> 网站首页 </button>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

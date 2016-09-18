@@ -1,0 +1,5 @@
+E:\svn_download\mvc_project\backup\taccisum4.0-160908-green\CustomerException\bin\Debug\Common.CustomerException.dll
+E:\svn_download\mvc_project\backup\taccisum4.0-160908-green\CustomerException\bin\Debug\Common.CustomerException.pdb
+E:\svn_download\mvc_project\backup\taccisum4.0-160908-green\CustomerException\obj\Debug\Common.CustomerException.csprojResolveAssemblyReference.cache
+E:\svn_download\mvc_project\backup\taccisum4.0-160908-green\CustomerException\obj\Debug\Common.CustomerException.dll
+E:\svn_download\mvc_project\backup\taccisum4.0-160908-green\CustomerException\obj\Debug\Common.CustomerException.pdb

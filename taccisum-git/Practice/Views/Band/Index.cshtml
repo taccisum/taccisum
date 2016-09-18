@@ -1,0 +1,403 @@
+﻿@{
+    ViewBag.Title = "Beacher-品牌管理";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+}
+@section head{
+    <script>
+        $(function() {
+            var $d_add_band = $("#dialog-add_band");
+            var $d_edit_band = $("#dialog-edit_band");
+
+
+            var dialogr_add_band_html = $d_add_band.html(); //添加品牌对话框网页
+            var dialogr_edit_band_html = $d_edit_band.html(); //编辑品牌对话框网页
+
+            $d_add_band.remove(); //将网页代码移除
+            $d_edit_band.remove(); //将网页代码移除
+
+            var table = $("#table_id")
+                .datatables_proxy(
+                {
+                    serverSide: true,
+                    iDisplayLength: 10,
+                    ajax: {
+                        url: "/Band/GetBandList",
+                        type: "post",
+                        data: function(data) {
+                            //添加额外的参数传给服务器
+                            data.BandName = $("#s-bandName").val();
+                            data.EnglishName = $("#s-englishName").val();
+                            data.EnglishFirstChar = $("#s-FirstChar").val();
+
+                        }
+                    },
+                    columns: [
+                        { data: 'ID', title: '品牌ID', "visible": false },
+                        { data: 'BandNum', title: '品牌编号', sortable: true },
+                        { data: 'BandName', title: '品牌名', bSortable: true },
+                        { data: 'EnglishName', title: '英文名' },
+                        { data: 'EnglishFirstChar', title: '首字母' },
+                        { data: 'Description', title: '品牌描述' }
+                    ],
+                     rowDbClick: function(api, row) {
+                            var vm;
+
+                            $.artdialog_proxy({
+                                id: "dialog-chat",
+                                title: "编辑品牌",
+                                content: dialogr_edit_band_html,
+                                width: "500px",
+                                button: [
+                                        {
+                                            id: "cancel",
+                                            value: "<i class='icon-remove'></i>取消",
+                                            callback: function () {
+                                                return true;
+                                            },
+                                            cls: "btn btn-default btn-sm",
+                                        },
+                                        {
+                                            id: "ok",
+                                            value: "<i class='icon-ok'></i>确定",
+                                            callback: function () {
+                                                var self = this;
+                                                self.title("提交中…");
+
+                                                var params = ko.mapping.toJS(vm);
+                                                $.post("/Band/Edit",
+                                                    params,
+                                                    function (result) {
+                                                        if (result.Success) {
+                                                            $.artdialog_msgbox({
+                                                                title: "提示",
+                                                                content: result.Message
+                                                            });
+                                                            self.remove();
+                                                            table.ajax.reload();
+                                                        } else {
+                                                            $.artdialog_msgbox({
+                                                                title: "提示",
+                                                                content: result.Message
+                                                            });
+                                                        }
+
+                                                    });
+
+                                                return false;
+                                            },
+                                            cls: "btn btn-success btn-sm"
+                                        }
+                                ],
+                                onshow: function() {
+                                    vm = {
+                                            ID: ko.observable(""),
+                                            BandNum: ko.observable(""),
+                                            BandName: ko.observable(""),
+                                            Description: ko.observable(""),
+                                            EnglishName: ko.observable(""),
+                                            EnglishFirstChar: ko.observable("")
+                                        }
+
+                                    var id = row.ID;
+                                    var bandNum = row.BandNum;
+                                    var description = row.Description;
+                                    var bandName = row.BandName;
+                                    var englishName = row.EnglishName;
+                                    var englishFirstChar = row.EnglishFirstChar;
+
+                                    var elem = document.getElementById("content-edit_band");
+                                    ko.cleanNode(elem);
+                                    ko.applyBindings(vm, elem);
+
+                                    vm.ID(id);
+                                    vm.BandNum(bandNum);
+                                    vm.Description(description);
+                                    vm.BandName(bandName);
+                                    vm.EnglishName(englishName);
+                                    vm.EnglishFirstChar(englishFirstChar);                               
+                                }
+                            })
+                                .showModal();
+                            return;
+                        }
+                });
+
+
+            $("#btn-add")
+                .bind("click",
+                    function() {
+                        var vm;
+                        $.artdialog_proxy({
+                                id: "dialog-chat",
+                                title: "新增品牌",
+                                content: dialogr_add_band_html,
+                                width: "500px",
+                                button: [
+                                    {
+                                        id: "cancel",
+                                        value: "<i class='icon-remove'></i>取消",
+                                        callback: function() {
+                                            return true;
+                                        },
+                                        cls: "btn btn-default btn-sm"
+                                    },
+                                    {
+                                        id: "ok",
+                                        value: "<i class='icon-ok'></i>确定",
+                                        callback: function() {
+                                            //参数校验
+                                            var bandName = $("input[name='BandName']").val();
+                                            var englishName = $("input[name='EnglishName']").val();
+                                            var englishFirstChar = $("input[name='EnglishFirstChar']").val();
+
+                                            if (bandName == "") {
+                                                $.artdialog_msgbox({
+                                                    title: "提示",
+                                                    content: "品牌名不能为空"
+                                                });
+                                                return false;
+                                            }
+
+                                            if (englishName == "") {
+                                                $.artdialog_msgbox({
+                                                    title: "提示",
+                                                    content: "英文名不能为空"
+                                                });
+                                                return false;
+                                            }
+
+                                            if (englishFirstChar == "") {
+                                                $.artdialog_msgbox({
+                                                    title: "提示",
+                                                    content: "首字母不能为空"
+                                                });
+                                                return false;
+                                            }
+
+                                            var self = this;
+                                            self.title("提交中…");
+                                            var params = ko.mapping.toJS(vm);
+                                            $.post("/Band/InsertBand",
+                                                params,
+                                                function(result) {
+                                                    if (result.Success) {
+                                                        $.artdialog_msgbox({
+                                                            title: "提示",
+                                                            content: result.Message
+                                                        });
+                                                        self.remove();
+                                                        table.ajax.reload();
+                                                    } else {
+                                                        $.artdialog_msgbox({
+                                                            title: "提示",
+                                                            content: result.Message
+                                                        });
+                                                    }
+
+                                                });
+
+
+                                            return false;
+                                        },
+                                        cls: "btn btn-success btn-sm"
+                                    }
+                                ],
+                                onshow: function() {
+                                    vm = {
+                                        BandName: ko.observable(""),
+                                        Description: ko.observable(""),
+                                        EnglishName: ko.observable(""),
+                                        EnglishFirstChar: ko.observable("")
+                                    }
+                                    ko.applyBindings(vm, document.getElementById("content-add_band")); //绑定数据
+                                }
+                            })
+                            .showModal();
+                    });
+
+            $("#btn-query")
+                .bind("click",
+                    function() {
+                        table.ajax.reload();
+                    });
+            $("#btn-delete")
+                .bind("click",
+                    function() {
+                        if (confirm("确认删除？")) {
+                            var rows = table.rows('.selected').data();
+                            var idList = "";
+
+                            $.each(rows,
+                                function(index, row) {
+                                    idList += row.ID + ",";
+                                });
+
+                            idList = idList.substr(0, idList.length - 1);
+                            $.get("/Band/Remove?idList=" + idList,
+                                function(result) {
+                                    $.artdialog_msgbox({
+                                        content: result.Message
+                                    });
+                                    if (result.Success) {
+                                        table.ajax.reload();
+                                    }
+                                });
+                        }
+
+                    });
+
+            $(".query-input")
+                .each(function() {
+                    $(this)
+                        .keyup(function(event) {
+                            var e = event || window.event;
+                            if (e.keyCode == "13") {
+                                $("#btn-query").click();
+                            }
+                        });
+                });
+         
+        });
+    </script>
+}
+
+@section tips{
+    <span class="bold">aaaasd</span>
+    <button type="button" class="close" data-dismiss="alert"><i class="icon-remove"></i></button>
+}
+
+@section parameters{
+    <div class="container" style="width: 100%;">
+        <div class="row">
+            <div class="col-xs-6 col-md-6">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-addon bold">品牌名</span>
+                    <input id="s-bandName" class="form-control query-input" type="text"/>
+                </div>
+            </div>
+            <div class="col-xs-6 col-md-6">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-addon bold">英文名</span>
+                    <input id="s-englishName" class="form-control query-input" type="text"/>
+                </div>
+            </div>
+        </div>
+        <br />
+        <div class="row">
+            <div class="col-xs-6 col-md-6">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-addon bold">首字母</span>
+                    <input id="s-FirstChar" class="form-control query-input" type="text" />
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@section buttons{
+    <button id="btn-query" class="btn btn-info btn-sm"><i class="icon-refresh"></i> 查询 </button>
+    <button id="btn-add" class="btn btn-success btn-sm"><i class="icon-plus"></i> 新增 </button>
+    <button id="btn-delete" class="btn btn-danger btn-sm"><i class="icon-remove"></i> 删除 </button>
+}
+
+
+<table id="table_id"></table>
+
+
+<div id="dialog-add_band" class="hidden">
+    <div id="content-add_band" class="container" style="width: 100%">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-addon bold">品牌名</span>
+                    <input class="form-control" name="BandName" data-bind="value: BandName" />
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-addon bold">商品描述</span>
+                    <input class="form-control" name="Description" data-bind="value: Description" />
+                </div>
+            </div>
+        </div>
+        <div class="emptyRow"></div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-addon bold">英文名</span>
+                    <input class="form-control" name="EnglishName" data-bind="value: EnglishName" />
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-addon bold">首字母</span>
+                    <input class="form-control" name="EnglishFirstChar" data-bind="value: EnglishFirstChar" />
+                </div>
+            </div>
+        </div>
+
+
+
+    </div>
+</div>
+
+<div id="dialog-edit_band" class="hidden">
+    <div id="content-edit_band" class="container" style="width: 100%">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="input-group input-group-sm">
+                    <input class="form-control" name="ID" type="hidden" data-bind="value: ID"/>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-8">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-addon bold">品牌编号</span>
+                    <input class="form-control"  readonly="readonly" name="BandNum" data-bind="value: BandNum" />
+                </div>
+            </div>
+        </div>
+        <div class="emptyRow"></div>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-addon bold">品牌名</span>
+                    <input class="form-control" name="BandName" data-bind="value: BandName"/>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-addon bold">商品描述</span>
+                    <input class="form-control" name="Description" data-bind="value: Description"/>
+                </div>
+            </div>
+        </div>
+        <div class="emptyRow"></div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-addon bold">英文名</span>
+                    <input class="form-control" name="EnglishName" data-bind="value: EnglishName"/>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-addon bold">首字母</span>
+                    <input class="form-control" name="EnglishFirstChar" data-bind="value: EnglishFirstChar"/>
+                </div>
+            </div>
+        </div>
+
+
+
+    </div>
+</div>
+
+
+
+
+

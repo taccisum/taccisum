@@ -1,0 +1,222 @@
+﻿@{
+    ViewBag.Title = "商品展示";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@section head
+{
+    <script>
+        $(function() {
+            var vm; //模型
+            var table = $("#table_id").datatables_proxy(
+            {
+                serverSide: true,
+                ajax: {
+                    url: "/Product/GetProductList",
+                    type: "post",
+                    data: function(data) {
+                        //添加额外的参数传给服务器
+                        data.ProductName = $("#s-productName").val();
+                        data.BandName = $("#s-Bandname").val();
+                    }
+                },
+                columns: [
+                    { data: 'ID', title: '商品ID', "visible": false },
+                    { data: 'ProductName', title: '商品名称', sortable: true },
+                    { data: 'Description', title: '描述' },
+                    { data: 'BandName', title: '品牌名称' },
+                    {
+                        data: 'PictureUrl',
+                        title: '商品图片',
+
+                        render: function(data, type, row, meta) {
+                            //这里是主题  把url变成超链接、把图片路径显示为图片
+                            //return "<a href='" + data + "'>" + data + "</a>";
+                            return "<img src='" + data + "'  width='80px'/>";
+                        }
+                    },
+                    { data: 'Price', title: '价格' }
+                ]
+                
+        });
+
+            var $dAddOrderProduct = $("#dialog-add_order_product");
+            var dialogrAddOrderProductHtml = $dAddOrderProduct.html();
+            $dAddOrderProduct.remove(); //移除HTML代码，重新加载
+            $("#btn-add").bind("click", function() {
+
+                var rows = table.rows('.selected').data();
+                var editNum = rows.length;
+                if (editNum === 0) {
+                    $.artdialog_msgbox({
+                        title: "提示",
+                        content: "请至少选择一种商品"
+                    });
+                }               
+
+                if (editNum === 1) {
+                    var _width = document.body.scrollWidth / 2;
+                    $.artdialog_proxy({
+                        id: "dialog-chat",
+                        title: "购买商品",
+                        content: dialogrAddOrderProductHtml,
+                        width: _width,
+                        button: [
+                        {
+                            id: "cancel",
+                            value: "<i class='icon-remove'></i>取消",
+                            callback: function() {
+                                return true;
+                            },
+                            cls: "btn btn-default btn-sm"
+                        },
+                        {
+                            id: "ok",
+                            value: "<i class='icon-ok'></i>确定",
+                            callback: function() {
+                                var self = this;
+                                self.title("提交中…");
+                                var phone = vm.Phone();
+                                var myreg = /^(((13[0-9]{1})|(15[0-9]{1})|(18[0-9]{1}))+\d{8})$/;
+                                if (myreg.test(phone) && !(vm.Address().replace(/\s+/g, "") === "") && !(vm.Name().replace(/\s+/g, "") === "")) {
+                                    var params = ko.mapping.toJS(vm);
+                                    $.post("/Order/orderNow", params, function (result) {
+                                        if (result.Success) {
+                                            $.artdialog_msgbox({
+                                                title: "提示",
+                                                content: "购买成功"
+                                            });
+                                            self.remove();
+                                            table.ajax.reload();
+                                        } else {
+                                            $.artdialog_msgbox({
+                                                title: "提示",
+                                                content: "购买失败"
+                                            });
+                                        }
+                                    });
+                                } 
+                                else {
+                                    $.artdialog_msgbox({
+                                        title: "提示",
+                                        content: "请输入正确的订单信息"
+                                    });
+                                }
+                    return false;
+                },
+                cls: "btn btn-success btn-sm"
+            }
+            ],
+            onshow: function() {
+                vm = {
+                    ProductName: ko.observable(""),
+                    ProductNum: ko.observable(""),
+                    ProductNO: ko.observable(""),
+                    ProductPrice: ko.observable(""),
+                    Name: ko.observable(""),
+                    Address: ko.observable(""),
+                    Phone: ko.observable("")
+
+                };
+                var elem = document.getElementById("content-add_order_product");
+                vm.ProductName(rows[0].ProductName);
+                vm.ProductNum(1);
+                vm.ProductPrice(rows[0].Price);
+                vm.ProductNO(rows[0].ID);
+
+                ko.cleanNode(elem);
+                ko.applyBindings(vm, elem);
+            }
+        }).showModal();
+        }
+        if (editNum > 1) {
+            $.artdialog_msgbox({
+                title: "提示",
+                content: "Sorry,只能购买一种商品"
+            });
+        }
+        });
+
+        $("#btn-query").bind("click", function() {
+            table.ajax.reload();
+        });
+        });
+
+        //var changeimg = function () {
+        //    alert('aaa');
+        //}
+        //window.onresize = function () {
+        //    changeimg();
+        //}
+    </script>
+}
+@section parameters{
+    <div class="container" style="width: 100%;">
+        <div class="row">
+            <div class="col-xs-6 col-md-6">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-addon bold">商品名</span>
+                    <input id="s-productName" class="form-control query-input" type="text"/>
+                </div>
+            </div>
+            <div class="col-xs-6 col-md-6">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-addon bold">品牌名</span>
+                    <input id="s-Bandname" class="form-control query-input" type="text"/>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+@section buttons{
+    <button class="btn btn-sm tooltip-info" id="btn-query"><i class="icon-search"></i> 查询商品 </button>
+    <!--======================================================================================================================-->
+    <button id="btn-add" class="btn btn-success btn-sm"><i class="icon-plus"></i> 购买商品 </button>
+}
+
+<div id="dialog-add_order_product" class="hidden">
+    <div id="content-add_order_product" class="container" style="width: 100%">
+        <div class="row">
+            <div class="col-md-4">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-addon bold">商品信息</span>
+                    <input class="form-control" data-bind="value: ProductName" readonly="readonly" />
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-addon bold">商品数量</span>
+                    <input class="form-control" data-bind="value: ProductNum"/>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-addon bold">商品单价</span>
+                    <input class="form-control" data-bind="value: ProductPrice" readonly="readonly"/>
+                </div>
+            </div>
+        </div>
+        <div class="emptyRow"></div>
+        <div class="row">
+            <div class="col-md-4">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-addon bold">顾客姓名</span>
+                    <input class="form-control" data-bind="value: Name" />
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-addon bold">收货地址</span>
+                    <input class="form-control" data-bind="value: Address" />
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-addon bold">联系方式</span>
+                    <input class="form-control" data-bind="value: Phone"/>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!--======================================================================================================================-->
+<table id="table_id" class="display"></table>

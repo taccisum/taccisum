@@ -1,0 +1,268 @@
+﻿@using System.Web.Optimization
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>@ViewBag.Title</title>
+
+    @Styles.Render("~/bundles/css/core")
+    @Styles.Render("~/bundles/css/icon-font")
+    @Styles.Render("~/bundles/css/jquery/plugins")
+    @Styles.Render("~/bundles/css/ace")
+    @Styles.Render("~/bundles/css/common")
+
+
+    @Scripts.Render("~/bundles/js/core")
+
+    @* knockout *@
+    <script src="/Scripts/Knockout/knockout-3.4.0.debug.js"></script>
+    <script src="/Scripts/Knockout/plugin/knockout.mapping-latest.js"></script>
+
+    @* requireJS *@
+    <script type="text/javascript" src="~/Scripts/requireJS/require.js"></script>
+    <script type="text/javascript" src="~/Scripts/Modules/Base/Config.js"></script>
+
+
+    @Scripts.Render("~/bundles/js/ace")
+
+    <link href="~/Scripts/jQueryPlugins/artDialog/css/ui-dialog.css" rel="stylesheet"/>
+
+
+    @RenderSection("head", required: false)
+
+    <style>
+        .colorpick-div {
+            margin: 5px 0;
+        }
+
+    </style>
+
+</head>
+<body class="skin-4">
+
+
+@* navbar *@
+    <div class="navbar navbar-default" >
+        <div class="navbar-container">
+            <div class="navbar-header pull-left">
+                <a href="/Home/Index" class="navbar-brand"><i class="icon-github"></i> Taccisum!</a>
+            </div>
+            <div class="navbar-header pull-right">
+                <ul class="nav ace-nav">
+                    <li class="orange">
+                        <a class="dropdown click" data-toggle="dropdown"><span class="icon-th-large"></span><i class="icon-caret-down"></i></a>
+                        <ul class="dropdown-navbar dropdown-menu dropdown-caret dropdown-close pull-left" role="menu">
+                            <li class="dropdown-header"><i class="icon-th-large"></i>选择你喜欢的风格</li>
+                            <li class="click" onclick="javascript: $('body').removeClass('skin-1 skin-2 skin-3 skin-4').addClass('skin-1');"><div class="colorpick-div" style="background-color:rgb(44, 106, 160); height: 20px;"></div></li>
+                            <li class="click" onclick="javascript: $('body').removeClass('skin-1 skin-2 skin-3 skin-4').addClass('skin-2');"><div class="colorpick-div" style="background-color:#C6487E; height: 20px;"></div></li>
+                            <li class="click" onclick="javascript: $('body').removeClass('skin-1 skin-2 skin-3 skin-4').addClass('skin-3');"><div class="colorpick-div" style="background-color:#222A2D; height: 20px;"></div></li>
+                            <li class="click" onclick="javascript: $('body').removeClass('skin-1 skin-2 skin-3 skin-4').addClass('skin-4');"><div class="colorpick-div" style="background-color:rgb(67, 142, 185); height: 20px;"></div></li>
+                        </ul>
+                    </li>
+
+                    <li class="grey">
+                        <a class="dropdown click" data-toggle="dropdown"><span class="icon-github-alt"></span><i class="icon-caret-down"></i></a>
+                        <ul class="dropdown-navbar dropdown-menu dropdown-caret dropdown-close pull-right" role="menu">
+                            <li class="dropdown-header"><i class="icon-github-alt"></i>C#相关</li>
+                            <li><a tabindex="-1" href="#">数据库设计</a></li>
+                            <li><a tabindex="-1" href="#">页面布局</a></li>
+                            <li><a tabindex="-1" href="#">功能迭代</a></li>
+                            <li class="divider"></li>
+                            <li><a tabindex="-1" href="#">分离的链接</a></li>
+                        </ul>
+                    </li>
+
+                    <li class="purple">
+                        <a class="dropdown click" data-toggle="dropdown"><span class="icon-tags"></span><i class="icon-caret-down"></i></a>
+                        <ul class="dropdown-navbar dropdown-menu dropdown-caret dropdown-close pull-right" role="menu">
+                            <li class="dropdown-header"><i class="icon-tags"></i>Tags</li>
+                            <li><a tabindex="-1" href="#">Entry1</a></li>
+                            <li><a tabindex="-1" href="#">Entry2</a></li>
+                            <li><a tabindex="-1" href="#">Entry3</a></li>
+                        </ul>
+                    </li>
+
+                    <li class="green">
+                        <a class="dropdown click" data-toggle="dropdown"><span class="icon-envelope"></span>&nbsp;<span class="badge badge-important">1</span></a>
+                        <ul class="dropdown-navbar dropdown-menu dropdown-caret dropdown-close pull-right" role="menu">
+                            <li class="dropdown-header"><i class="icon-info-sign"></i>Font Awesome！</li>
+                            <li><span style="color: gray; font-size: 12px;">完美的图标字体，只为Bootstrap设计！</span></li>
+                        </ul>
+                    </li>
+
+                    <li class="light-blue2">
+                        <a data-toggle="dropdown" href="#" class="dropdown-toggle">
+                            <i class="icon-cog" style="font-size: 20px; margin-top: 10px;"></i>
+                            <span class="user-info">
+                                <small>欢迎您</small>
+                                 Tac
+                            </span>
+
+                            <i class="icon-caret-down"></i>
+                        </a>
+                        <ul class="user-menu dropdown-menu dropdown-yellow dropdown-caret dropdown-close pull-right">
+                            <li><a href="#"><i class="icon-cog"></i>设置</a></li>
+                            <li><a href="#"><i class="icon-user"></i>个人资料</a></li>
+                            <li class="divider"></li>
+                            <li>
+                                <a href="/User/Login"><i class="icon-off"></i>退出</a>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+<div class="main-container" id="main-container">
+    @*sidebar*@
+    <div class="main-container-inner">
+        <a class="menu-toggler" id="menu-toggler" href="#">
+            <span class="menu-text"></span>
+        </a>
+        <div class="sidebar" id="sidebar">
+            @* short cuts *@
+            <div class="sidebar-shortcuts" id="sidebar-shortcuts">
+                <div class="sidebar-shortcuts-large">
+                    <button class="btn btn-success"><i class="icon-lemon"></i></button>
+                    <button class="btn btn-info"><i class="icon-comments"></i></button>
+                    <button class="btn btn-warning"><i class="icon-globe"></i></button>
+                    <button class="btn btn-danger"><i class="icon-home"></i></button>
+                </div>
+                <div class="sidebar-shortcuts-mini">
+                    <span class="btn btn-success"></span>
+                    <span class="btn btn-info"></span>
+                    <span class="btn btn-warning"></span>
+                    <span class="btn btn-danger"></span>
+                </div>
+            </div>
+
+            <div class="sidebar-shortcuts">
+                <div class="sidebar-shortcuts-large" style="line-height: 34px;"> @*设置line-height修正ace style造成的样式错乱*@
+                    @* menu searcher *@
+                    <div id="menu-searcher" class="input-group input-group-merge" style="padding: 3px 6px;">
+                        <input class="form-control input-md left" type="text"/>
+                        <span class="input-group-btn right" style="margin: 0"><button class="btn btn-white btn-md">&nbsp;<i class="icon-map-marker"></i></button></span>
+                    </div>
+                </div>
+                <div class="sidebar-shortcuts-mini">
+                </div>
+            </div>
+
+
+            @* nav list *@
+            <ul class="nav nav-list" id="nav-list">
+
+            </ul>
+            <div class="sidebar-collapse" id="sidebar-collapse">
+                <i class="icon-double-angle-left" data-icon1="icon-double-angle-left" data-icon2="icon-double-angle-right"></i>
+            </div>
+        </div>
+        <div class="main-content">
+            <div class="breadcrumbs">
+                <ul class="breadcrumb">
+                    <li><i class="icon-coffee home-icon"></i><a href="#">面</a></li>
+                    <li><a href="#">包</a></li>
+                    <li>屑</li>
+                </ul>
+            </div>
+            <div id="page-content" class="page-content">
+                <div id="area-operation" class="area-operation">
+                    <div id="area-tips" class="area-tips area-info alert alert-success" style="display: none;">
+                        @RenderSection("tips", required: false)
+                    </div>
+                    <div id="area-parameters" class="area-parameters area-param alert alert-info" style="display: none;">
+                        @RenderSection("parameters", required: false)
+                    </div>
+                    <div id="area-button" class="area-button" style="display: none;">
+                        @RenderSection("buttons", required: false)
+                    </div>
+                </div>
+                <div id="area-display" class="area-display">
+                    @RenderBody()
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+    @* autocomplete container *@
+<div id="jq-ui-autocomplete-1" class="ui-front"></div>
+<div id="jq-ui-autocomplete-2" class="ui-front"></div>
+
+<script>
+    var debug = false;
+    var sidebar;
+
+    require(["base"]);
+    require(["systools","sidebar"], function (tool, sidebarManager) {
+        //menus搜索框
+        function bindMenuSearcher(array) {
+            var acArray = new List(array).divide(["ID", "Name", "Description"], ["value", "label", "desc"]).getArray();
+
+            var $input = $("#menu-searcher").find("input");
+            var $btn = $("#menu-searcher").find("button");
+
+            tool.autocomplete("#menu-searcher input", {
+                source: acArray,
+                width: 168,
+                height: 400,
+                descFormatter: function(item) {
+                    if ($.isNullOrEmptyString(item.desc)) {
+                        return "";
+                    } else {
+                        return "desc: " + item.desc;
+                    }
+                },
+            });
+
+            $btn.bind("click", function() {
+                var targetId = $input.attr("data-val");
+                sidebar.CollapseAll(false);
+                sidebar.Open(targetId, false);
+                sidebar.PointAt(targetId);
+            });
+        }
+
+        //short cuts buttons事件
+        function bindShortCuts() {
+            $("#sidebar-shortcuts .btn-success").bind("click", function() {
+                tool.dialog({
+                    id: "dialog-lemon",
+                    title: "lemon",
+                    content: "<input autofocus />",
+                    fixed: true,
+                }).showModal();
+            });
+
+            $("#sidebar-shortcuts .btn-info").bind("click", function() {
+                tool.dialog({
+                    id: "dialog-chat",
+                    content: "hello, let's chat~",
+                    quickClose: true,
+
+                }).show(this);
+            });
+        }
+
+        //初始化
+        $.get("/CommonInfo/Menus", function(result) {
+            if (result.Success) {
+                sidebar = sidebarManager.getInstance(result.Data, "#nav-list");
+                sidebar.Load();
+                sidebar.Open(sidebar.CurrentMenuId(), true);
+
+                bindMenuSearcher(result.Data);
+                bindShortCuts();
+            } else {
+                alert(result.Message);
+            }
+        });
+    });
+
+</script>
+
+</body>
+</html>

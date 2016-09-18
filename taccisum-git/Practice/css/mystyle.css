@@ -1,0 +1,81 @@
+﻿/**
+    这个文件里主要写一些全局的标签的样式
+    */
+
+body, body * {
+    font-family: 微软雅黑;
+}
+
+body *::selection { background: dimgray; color: whitesmoke; }
+
+/*禁止文本选择*/
+.navbar, .sidebar, select {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+/*datatables插件的select动态效果*/
+table.dataTable tbody tr.selected {
+    background-color: #B0BED9;
+  	transition:background-color 0.1s linear;
+	-webkit-transition:background-color 0.1s linear;
+}
+
+.main-content {
+    font-size: 12px;
+}
+
+.main-container .page-content {
+    padding-top: 15px;
+}
+
+.main-container .area-operation {
+    width: 100%;
+    position: relative;
+}
+
+.main-container .area-operation .area-info {
+    padding: 10px 20px;
+    margin-bottom: 10px;
+    float: left;
+    width: 100%;
+    font-size: 13px;
+}
+
+.main-container .area-operation .area-param {
+    float: left;
+    width: 100%;
+}
+
+.main-container .area-operation .area-button {
+    text-align: center;
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+.main-container .area-display {
+    float: left;
+    width: 100%;
+}
+
+.input-group.input-group-merge > span.input-group-addon.left,
+.input-group.input-group-merge > input.left,
+.input-group.input-group-merge > span.input-group-btn.left > button
+ {
+    border-right: none;
+}
+.input-group.input-group-merge > span.input-group-addon.middle,
+.input-group.input-group-merge > input.middle,
+.input-group.input-group-merge > span.input-group-btn.middle > button  {
+    border-left: none;
+    border-right: none;
+}
+.input-group.input-group-merge > span.input-group-addon.right,
+.input-group.input-group-merge > input.right,
+.input-group.input-group-merge > span.input-group-btn.right > button   {
+    border-left: none;
+}

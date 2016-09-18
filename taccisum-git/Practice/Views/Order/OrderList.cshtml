@@ -1,0 +1,204 @@
+﻿@{
+    ViewBag.Title = "订单管理";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section head
+{
+
+    <script>
+        require(["systools"], function(tool) {
+            var $dialogrwatchorder = $("#dialogr-watch_order");
+            var dialogrwatchorderhtml = $dialogrwatchorder.html();
+            $dialogrwatchorder.remove();
+
+            var table = tool.table("#table_id", {
+                serverSide: true,
+                ajax: {
+                    url: "/Order/GetOrderList",
+                    type: "post",
+                    data: function(d) {
+                        //添加额外的参数传给服务器,并去掉字符串
+                        d.OrderNO = $("#txt-OrderNO").val().replace(/\s+/g, "");
+                        d.Address = $("#txt-Address").val().replace(/\s+/g, "");
+                        d.Phone = $("#txt-Phone").val().replace(/\s+/g, "");
+                        d.Name = $("#txt-Name").val().replace(/\s+/g, "");
+                    }
+                },
+                columns: [
+                    { data: 'OrderNO', title: '订单编号', sortable: true },
+                    { data: 'Name', title: '顾客姓名' },
+                    { data: 'Phone', title: '联系电话' },
+                    { data: 'Address', title: '收货地址' },
+                    { data: 'CreatedOn', title: '下单时间' }
+                ],
+
+                rowDbClick: function(api, row) {
+                    var vm;
+                    var _width = document.body.clientWidth / 1.5;
+                    $.get('/Order/GetOrderItem', { orderNO: row.OrderNO }, function(data) {
+                        tool.dialog({
+                            id: "dialog-chat",
+                            title: "订单详情",
+                            content: dialogrwatchorderhtml,
+                            width: _width,
+                            onshow: function() {
+                                vm = {
+                                    ProductName: ko.observable(""),
+                                    ProductNum: ko.observable(""),
+                                    ProductPrice: ko.observable(""),
+                                    OrderPrice: ko.observable(""),
+                                    OrderNO: ko.observable(""),
+                                    Name: ko.observable(""),
+                                    Phone: ko.observable(""),
+                                    Address: ko.observable(""),
+                                    CreatedOn: ko.observable("")
+
+
+                                }
+                                ko.applyBindings(vm, document.getElementById("content-watch_order"));
+                                var pName = data.ProductName;
+                                var pNum = data.ProductNum;
+                                var pPrice = data.ProductPrice;
+
+                                vm.OrderNO(row.OrderNO);
+                                vm.Address(row.Address);
+                                vm.Phone(row.Phone);
+                                vm.CreatedOn(row.CreatedOn);
+                                vm.Name(row.Name);
+                                vm.ProductName(pName);
+                                vm.ProductNum(pNum);
+                                vm.ProductPrice(pPrice);
+                                vm.OrderPrice(pNum * pPrice);
+                            }
+                        }).showModal();
+                        return;
+                    });
+
+                }
+            });
+
+            $("#btn-query").bind("click", function() {
+                table.ajax.reload();
+            });
+        });
+
+    </script>
+
+}
+@*
+
+@section tips{
+    <div style="text-align: center">
+        <span class="bold"></span>       
+    </div>
+    <button type="button" class="close" data-dismiss="alert"><i class="icon-remove"></i></button>
+}
+*@
+
+@section parameters{
+    <div class="container" style="width: 100%;">
+        <form id="queryForm">
+            <div class="row">
+                <div class="col-xs-2 col-md-3">
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-addon bold">订单号</span><input class="form-control" type="text" id="txt-OrderNO" />
+                    </div>
+                </div>
+                <div class="col-xs-2 col-md-3">
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-addon bold">顾客姓名</span><input class="form-control" type="text" id="txt-Name"/>
+                    </div>
+                </div>
+                <div class="col-xs-2 col-md-3">
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-addon bold">收货地址</span><input class="form-control" type="text" id="txt-Address"/>
+                    </div>
+                </div>
+                <div class="col-xs-2 col-md-3">
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-addon bold">联系方式</span><input class="form-control" type="text" id="txt-Phone" />
+                    </div>
+                </div>
+            </div>
+            <br/>
+        </form>
+    </div>
+}
+
+@section buttons{
+    <button class="btn btn-sm tooltip-info" id="btn-query"><i class="icon-search"></i> 订单查询 </button>
+}
+
+<div id="dialogr-watch_order" class="hidden">
+    <div id="content-watch_order" class="container" style="width: 100%">
+        <div class="row">
+            <div class="col-md-4">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-addon bold">订单编号</span>
+                    <input class="form-control" data-bind="value: OrderNO" readonly="readonly" />
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-addon bold">顾客姓名</span>
+                    <input class="form-control" data-bind="value: Name" readonly="readonly" />
+                </div>
+            </div>  
+            <div class="col-md-4">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-addon bold">商品信息</span>
+                    <input class="form-control" data-bind="value: ProductName" readonly="readonly"/>
+                </div>
+            </div>
+           
+        </div>
+        <div class="emptyRow"></div>
+        <div class="row">
+            <div class="col-md-4">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-addon bold">商品数量</span>
+                    <input class="form-control" data-bind="value: ProductNum" readonly="readonly" />
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-addon bold">商品单价</span>
+                    <input class="form-control" data-bind="value: ProductPrice" readonly="readonly"/>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-addon bold">订单总价</span>
+                    <input class="form-control" data-bind="value: OrderPrice" readonly="readonly"/>
+                </div>
+            </div>
+
+        </div>
+        <div class="emptyRow"></div>
+        <div class="row">
+            <div class="col-md-4">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-addon bold">手机号码</span>
+                    <input class="form-control" data-bind="value: Phone" readonly="readonly" />
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-addon bold">收货地址</span>
+                    <input class="form-control" data-bind="value: Address" readonly="readonly"/>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-addon bold">下单时间</span>
+                    <input class="form-control" data-bind="value:CreatedOn" readonly="readonly"/>
+                </div>
+            </div>
+        </div>
+        
+    </div>
+</div>
+
+<table id="table_id" class="display"></table>

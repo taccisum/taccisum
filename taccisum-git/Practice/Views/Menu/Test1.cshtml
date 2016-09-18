@@ -1,0 +1,40 @@
+﻿
+@{
+    ViewBag.Title = "Test1";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section tips{
+    <span>assada </span>
+}
+
+@section parameters{
+    <div class="container" style="width: 100%">
+        <div class="row col-lg-5">
+            <div class=" input-group input-group-sm">
+                <span class="input-group-addon"><i class="icon-apple"></i></span>
+                <input class="form-control"/>
+            </div>
+        </div>
+    </div>
+}
+
+@section buttons{
+    <div style="position: absolute; right: 20px; bottom: 0; z-index: 0;">
+        <div class="checkbox">
+            <label>
+                <input name="form-field-checkbox" type="checkbox" class="ace">
+                <span class="lbl"> 复选框 1</span>
+            </label>
+            <label>
+                <input name="form-field-checkbox" type="checkbox" class="ace ace-checkbox-2">
+                <span class="lbl"> 复选框 2</span>
+            </label>
+        </div>
+    </div>
+
+    <button class="btn btn-sm tooltip-info"><i class="icon-search"></i> 查询 </button>
+    <span class="btn btn-success btn-sm"><i class="icon-plus"></i> 添加 </span>
+    <button class="btn btn-danger btn-sm"><i class="icon-remove"></i> 删除 </button>
+    <button class="btn btn-primary btn-sm"><i class="icon-refresh"></i> 刷新 </button>
+}

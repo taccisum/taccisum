@@ -1,0 +1,102 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{BC5DE5B8-86BA-46B6-B0A4-C8D420B8A538}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Service</RootNamespace>
+    <AssemblyName>Service</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="log4net">
+      <HintPath>..\packages\log4net-1.2.15\bin\net\4.5\release\log4net.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=4.5.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Newtonsoft.Json.9.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.ComponentModel.Composition" />
+    <Reference Include="System.ComponentModel.Composition.Registration" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Base\BaseService.cs" />
+    <Compile Include="Impl\Bands\Product\ProductBandServiceImpl.cs" />
+    <Compile Include="Impl\Orders\Product\ProductOrderItemServiceImpl.cs" />
+    <Compile Include="Impl\Sys\SysUserDemoServiceImpl.cs" />
+    <Compile Include="Interf\Bands\Product\IProductBandService.cs" />
+    <Compile Include="Interf\Orders\Product\IProductOrderItemService.cs" />
+    <Compile Include="Impl\Orders\Product\ProductOrderServiceImpl.cs" />
+    <Compile Include="Impl\Product\ProductServiceImpl.cs" />
+    <Compile Include="Impl\Product\ProductSkuServiceImpl.cs" />
+    <Compile Include="Impl\Sys\SysMenuServiceImpl.cs" />
+    <Compile Include="Impl\Sys\SysUserServiceImpl.cs" />
+    <Compile Include="Interf\Orders\Product\IProductOrderService.cs" />
+    <Compile Include="Interf\Product\IProductService.cs" />
+    <Compile Include="Interf\Product\IProductSkuService.cs" />
+    <Compile Include="Interf\Sys\ISysMenuService.cs" />
+    <Compile Include="Interf\Sys\ISysUserDemoService.cs" />
+    <Compile Include="Interf\Sys\ISysUserService.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Global\Common.Global.csproj">
+      <Project>{c2be7b4b-0101-485b-a92d-7acbc42646f8}</Project>
+      <Name>Common.Global</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\HelperUnit\Common.Tool.csproj">
+      <Project>{8142b85f-b0c3-49ca-a3f7-fd4e7dae410d}</Project>
+      <Name>Common.Tool</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\IoC\IoC.Manager.csproj">
+      <Project>{67281155-c47e-4d2c-81af-4b5898fd216f}</Project>
+      <Name>IoC.Manager</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Models\Model.csproj">
+      <Project>{7038a79a-4514-4fca-8bb9-a12f1153960b}</Project>
+      <Name>Model</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Repository\Repository.csproj">
+      <Project>{888b2c47-9f19-4e91-872a-7c762aa2c818}</Project>
+      <Name>Repository</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

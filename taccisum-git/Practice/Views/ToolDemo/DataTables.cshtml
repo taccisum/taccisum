@@ -1,0 +1,144 @@
+﻿
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section head
+{
+    <script>
+        require(["systools"], function(tool) {
+            var dataSource = [
+                {
+                    name: "Tiger Nixon",
+                    position: "System Architect",
+                    salary: "$3,120",
+                    start_date: "2011/04/25",
+                    office: "Edinburgh",
+                    extn: "5421"
+                },
+                {
+                    name: "Garrett Winters",
+                    position: "Director",
+                    salary: "$5,300",
+                    start_date: "2011/07/25",
+                    office: "Edinburgh",
+                    extn: "8422"
+                }
+            ];
+
+            $("#btn1").on("click", function () {
+                tool.table("#table_id", {
+                    serverSide: false,      //本地数据
+                    data: dataSource,       //本地数据源必填
+                    columns: [
+                        { data: 'name', title: 'name' },
+                        { data: 'position', title: 'position' },
+                        { data: 'salary', title: 'salary' },
+                        { data: 'start_date', title: 'start date' },
+                        { data: 'office', title: 'office' },
+                        { data: 'extn', title: 'extn' },
+                    ]
+                });
+
+                tool.table("#table_id1", {
+                    serverSide: true,       //服务端数据
+                    ajax: {
+                        url: "/ToolDemo/GetUserList?pageindex=1",
+                        type: "get"
+                    },      //服务端模式时ajax必填
+                    columns: [
+                        { data: 'ID', title: 'ID' },
+                        { data: 'UserName', title: 'Name' },
+                        { data: 'Password', title: 'Password' }
+                    ]
+                });
+            });
+
+            $("#btn_init").on("click", function () {
+                tool.table("#table_init", {
+                    serverSide: true,
+                    ajax: {
+                        url: "/ToolDemo/GetUserList?pageindex=1",
+                        type: "get"
+                    },
+                    columns: [
+                        { data: 'ID', title: 'ID' },
+                        { data: 'UserName', title: 'Name' },
+                        { data: 'Password', title: 'Password' }
+                    ],
+                    init: function (api, tableData) {
+                        tool.msgbox("表格初始化完成", "y", 0);
+                    },      //表格初始化完成回调函数，经测试，貌似只对服务端数据的加载完成会回调
+                });
+            });
+
+            $("#btn_dblClick").on("click", function () {
+                tool.table("#table_dblClick", {
+                    serverSide: false,
+                    data: dataSource,
+                    columns: [
+                        { data: 'name', title: 'name' },
+                        { data: 'position', title: 'position' },
+                        { data: 'salary', title: 'salary' },
+                        { data: 'start_date', title: 'start date' },
+                        { data: 'office', title: 'office' },
+                        { data: 'extn', title: 'extn' },
+                    ],
+                    rowDbClick: function (api, rowData, tableData) {
+                        tool.msgbox(
+                            "<div class='text-left msgbox-text'><span>My name is " + rowData.name + ", position " + rowData.position + "</span>" +
+                            "<br/><a class='pull-right' href='javascript: alert(\"hello " + rowData.name + "\")' style='font-size:12px;'>More detail</a></div>"
+
+                            , "i", 0);
+                    },      //行双击事件的回调函数
+                });
+            });
+
+            $("#btn_forbidSelect").on("click", function () {
+                tool.table("#table_forbidSelect", {
+                    select: false,      //禁止选择行
+                    hover: false,       //行hover
+                    serverSide: false,
+                    data: dataSource,
+                    columns: [
+                        { data: 'name', title: 'name' },
+                        { data: 'position', title: 'position' },
+                        { data: 'salary', title: 'salary' },
+                        { data: 'start_date', title: 'start date' },
+                        { data: 'office', title: 'office' },
+                        { data: 'extn', title: 'extn' },
+                    ]
+                });
+            });
+        });
+    </script>
+}
+
+@section tips{
+    <span class="bold">基于DataTables.js封装的系统工具tool.table的使用示例</span>
+    <button type="button" class="close" data-dismiss="alert"><i class="icon-remove"></i></button>
+}
+
+<button id="btn1" class="btn btn-info btn-sm">加载数据</button>
+<br /><br />
+<span class="bold">本地数据源</span>
+<table id="table_id"></table>
+<hr />
+<span class="bold">服务端数据</span>
+<table id="table_id1"></table>
+<hr/>
+
+<button id="btn_init" class="btn btn-success btn-sm">初始化事件</button>
+<br /><br />
+<table id="table_init"></table>
+<hr />
+
+<button id="btn_dblClick" class="btn btn-primary btn-sm">双击事件</button>
+<br /><br />
+<table id="table_dblClick"></table>
+<hr />
+
+<button id="btn_forbidSelect" class="btn btn-danger btn-sm">禁止选择行</button>
+<br /><br />
+<table id="table_forbidSelect"></table>
+<hr />

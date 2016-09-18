@@ -1,0 +1,147 @@
+﻿
+@{
+    ViewBag.Title = "Tac - 菜单管理";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section head
+{
+    <script>
+        require(["ViewJs/Menu/MenuList"], function (module) {
+            module.init();
+        });
+    </script>
+}
+
+
+@section tips{
+    <span class="bold">菜单管理页，可在本页面对现在的菜单进行增删改查等操作……</span>
+    <button type="button" class="close" data-dismiss="alert"><i class="icon-remove"></i></button>
+}
+
+@section parameters{
+    <div class="container" style="width: 100%;">
+        <div class="row">
+            <div class="col-xs-6 col-md-3">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-addon bold">Name</span><input class="form-control" type="text" />
+                </div>
+            </div>
+            <div class="col-xs-6 col-md-3">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-addon bold">Url</span><input class="form-control" type="text" />
+                </div>
+            </div>
+            <div class="col-xs-6 col-md-3">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-addon bold">Icon</span><input class="form-control" type="text" />
+                </div>
+            </div>
+            <div class="col-xs-6 col-md-3">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-addon bold">EnabledState</span><input class="form-control" type="text" />
+                </div>
+            </div>
+        </div>
+
+        <br />
+
+        <div class="row">
+
+            <div class="col-xs-6 col-md-3">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-addon bold">Description</span><input class="form-control" type="text" />
+                </div>
+            </div>
+            <div class="col-xs-6 col-md-3">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-addon bold">CreatedOn</span><input class="form-control" type="text" />
+                </div>
+            </div>
+            <div class="col-xs-12 col-md-6">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-addon bold">CreatedOn</span>
+                    <input id="date-picker-1" class="form-control date-picker click" type="text" />
+                    <span class="input-group-addon">到</span>
+                    <input id="date-picker-2" class="form-control date-picker click" type="text" />
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@section buttons{
+    <div style="position: absolute; right: 20px; bottom: 0; z-index: 0;">
+        <div class="checkbox">
+            <label>
+                <input name="form-field-checkbox" type="checkbox" class="ace">
+                <span class="lbl"> 复选框 1</span>
+            </label>
+            <label>
+                <input name="form-field-checkbox" type="checkbox" class="ace ace-checkbox-2">
+                <span class="lbl"> 复选框 2</span>
+            </label>
+        </div>
+    </div>
+
+    <button id="btn-query" class="btn btn-sm tooltip-info"><i class="icon-search"></i> 查询 </button>
+    <button id="btn-add" class="btn btn-success btn-sm"><i class="icon-plus"></i> 添加 </button>
+    <button id="btn-delete" class="btn btn-danger btn-sm"><i class="icon-remove"></i> 删除 </button>
+    <button id="btn-disable" class="btn btn-primary btn-sm"><i class="icon-refresh"></i> 失能 </button>
+}
+
+<table id="table_id" class="display"></table>
+
+
+<div id="dialog-add_menu" class="hidden">
+    <div id="content-add_menu" class="container" style="width: 100%">
+        <!-- ko if: debug -->
+        <div class="row">
+            <div class="col-md-12">
+                <button id="btn_mock_menu" class="btn btn-info btn-sm"><i class="icon-pencil"></i>Mock</button>
+            </div>
+        </div>
+        <div class="emptyRow"></div>
+        <!-- /ko -->
+        <div class="row">
+            <div class="col-md-6">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-addon bold">菜单名称</span>
+                    <input class="form-control" data-bind="value: Name"/>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-addon bold">父节点ID</span>
+                    <input class="form-control" data-bind="value: ParentId"/>
+                </div>
+            </div>
+        </div>
+        <div class="emptyRow"></div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-addon bold">菜单图标</span>
+                    <input class="form-control" data-bind="value: Icon"/>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-addon bold">链接URL</span>
+                    <input class="form-control" data-bind="value: Url"/>
+                </div>
+            </div>
+        </div>
+        <div class="emptyRow"></div>
+
+        <div class="row">
+            <div class="col-md-12">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-addon bold">描述</span>
+                    <textarea class="form-control" data-bind="value: Description" style="height: 100px; resize: vertical"></textarea>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

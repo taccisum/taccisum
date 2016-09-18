@@ -1,0 +1,83 @@
+﻿
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+@section tips{
+    <span class="bold">基于jQuery-AutoComplete插件封装的系统工具tool.autocomplete使用示例</span>
+    <button type="button" class="close" data-dismiss="alert"><i class="icon-remove"></i></button>
+}
+
+<div class="container" style="width: 100%; margin-top: 15px;">
+    <div class="row">
+        <div class="col-xs-6">
+            <div class="input-group input-group-merge">
+                <span class="input-group-addon "><i class="icon-pencil"></i></span>
+                <input id="search" class="form-control right" type="text" placeholder='输入一个字符如"a"进行联想' />
+            </div>
+        </div>
+        <div class="col-xs-6">
+            <div class="input-group input-group-merge">
+                <span class="input-group-addon "><i class="icon-pencil"></i></span>
+                <input id="tags" class="form-control right" type="text" placeholder='输入一个字符如"a"进行联想' />
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+
+
+    require(["systools"], function (tool) {
+        var data = [
+            { label: "anders", category: "" },
+            { label: "andreas", category: "" },
+            { label: "antal", category: "" },
+            { label: "annhhx10", category: "Products" },
+            { label: "annk K12", category: "Products" },
+            { label: "annttop C13", category: "Products" },
+            { label: "anders andersson", category: "People" },
+            { label: "andreas andersson", category: "People" },
+            { label: "andreas johnson", category: "People" }
+        ];
+
+        var availableTags = [
+            "ActionScript", "AppleScript", "Asp", "BASIC", "C", "C++", "Clojure", "COBOL", "ColdFusion", "Erlang", "Fortran", "Groovy",
+            "Haskell", "Java", "JavaScript", "Lisp", "Perl", "PHP", "Python", "Ruby", "Scala", "Scheme"
+        ];
+
+
+        //通用的autocomplete
+        tool.autocomplete("#tags", {
+            delay: 0,
+            source: availableTags
+        });
+
+
+
+
+        //分类的autocomplete（todo::未进行封装）
+        //custom autocomplete (category selection)
+        $.widget("custom.catcomplete", $.ui.autocomplete, {
+            _renderMenu: function (ul, items) {
+                var that = this,
+                    currentCategory = "";
+                $.each(items, function (index, item) {
+                    if (item.category != currentCategory) {
+                        ul.append("<li class='ui-autocomplete-category'>" + item.category + "</li>");
+                        currentCategory = item.category;
+                    }
+                    that._renderItemData(ul, item);
+                });
+            }
+        });
+
+        $("#search").catcomplete({
+            delay: 0,
+            source: data
+        });
+    });
+</script>

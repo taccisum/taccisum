@@ -1,0 +1,146 @@
+﻿
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Login</title>
+    @* jquery *@
+    <script src="/Scripts/jQuery/jquery-2.2.3.js"></script>
+
+    @*bootstrap*@
+    <link rel="stylesheet" href="/css/bootstrap-3.3.5-dist/css/bootstrap.css" />
+    @*<link rel="stylesheet" href="/css/bootstrap-3.3.5-dist/css/bootstrap-theme.css"/>*@
+    <script src="/css/bootstrap-3.3.5-dist/js/bootstrap.js"></script>
+
+    <link rel="stylesheet" href="/css/ace/css/font-awesome.min.css" />
+
+    @* knockout *@
+    <script src="/Scripts/Knockout/knockout-3.4.0.debug.js"></script>
+    <script src="/Scripts/Knockout/plugin/knockout.mapping-latest.js"></script>
+
+    @* ace skins *@
+    <link rel="stylesheet" href="/css/ace/css/ace.min.css" />
+
+
+</head>
+<body>
+<style>
+    body {
+        font-family: 微软雅黑;
+        font-size: 13px;
+        background: #fff;
+    }
+    h1 {
+        font-size: 40px;
+        color: gray;
+        margin-bottom: 20px;
+    }
+
+     .blank {
+         height: 200px;
+     }
+    .container {
+        text-align: center;
+        height: auto;
+    }
+
+    .bound {
+        /*background: skyblue;*/
+        border: rgb(222,222,222) 1px solid;
+        box-shadow: gray 2px 2px 5px;
+        height: 230px;
+        width: 450px;
+        text-align: center;
+    }
+
+    .click {
+        cursor: pointer;
+    }
+</style>
+
+<div class="blank"></div>
+<div class="container">
+    <div class="title" style="margin: 0 auto;">
+        <h1>Login</h1>
+    </div>
+    <div class="bound center-block">
+        <div class="input-group input-group-md" style="width: 80%; margin: 0 auto; margin-top: 40px;">
+            <span class="input-group-addon"><span class="glyphicon glyphicon-user"></span></span>
+            <input class="form-control" type="text" data-bind="value: uid"/>
+        </div>
+        <div class="input-group input-group-md" style="width: 80%; margin: 0 auto; margin-top: 15px;">
+            <span class="input-group-addon"><span class="glyphicon glyphicon-lock"></span></span>
+            <input class="form-control" type="password" data-bind="value: psd, attr:{'type':psdVisible()?'text':'password' }" style="border-right: none;"/>
+            <span class="input-group-btn">
+                <button id="btn-psd_visible" class="btn btn-white click" style="border-left: none;">&nbsp;
+                    <i class="glyphicon" data-bind="css:{
+                    'glyphicon-eye-open':!psdVisible()
+                    ,'glyphicon-eye-close':psdVisible()}">
+                    </i>
+                </button>
+            </span>
+        </div>
+        <div style="margin-top: 15px; margin-right: 70px; text-align: right;">
+            <div class="checkbox">
+                <label>
+                    <input name="form-field-checkbox" type="checkbox" class="ace" data-bind="checked: remeber">
+                    <span class="click lbl">&nbsp;&nbsp;记住密码</span>
+                </label>
+            </div>
+
+        </div>
+        <div style="margin-top: 10px;">
+            <button class="btn btn-info btn-sm" type="button" style="width: 80px;">注 册</button>
+            &nbsp;&nbsp;&nbsp;
+            <button id="btn-login" class="btn btn-success btn-sm" type="button" data-bind="text: loginBtnText" style="width: 80px;"></button>
+        </div>
+    </div>
+</div>
+
+<script>
+    var vm = {
+        uid: ko.observable("Admin"),
+        psd: ko.observable("admin"),
+        remeber: ko.observable(true),
+        psdVisible: ko.observable(false),
+        loginBtnText: ko.observable("登 录")
+    }
+
+    function BindingEvents() {
+        $("#btn-psd_visible").bind("click", function () {
+            vm.psdVisible(!vm.psdVisible());
+        });
+        $("#btn-login").bind("click", function () {
+            var $btn = $(this);
+            vm.loginBtnText("登录中");
+            $btn.addClass("disabled").attr("disabled", "disabled");
+            var info = ko.mapping.toJS(vm);
+            $.post("/User/Verify", info, function (result) {
+                if (result) {
+                    location.href = "/Home/Index";
+                } else {
+                    alert("登录失败");
+                    $btn.removeClass("disabled").removeAttr("disabled", "disabled");
+                    vm.loginBtnText("登 录");
+                }
+            });
+        });
+    }
+
+    $(function () {
+        $(".blank").height((document.body.scrollHeight - $(".container").height()) / 3);
+
+        ko.applyBindings(vm, document.getElementsByTagName("body")[0]);
+        BindingEvents();
+    });
+
+
+</script>
+
+</body>
+</html>
